@@ -17,6 +17,7 @@ include_directories(${OpenCV_INCLUDE_DIRS} include)
 # Set source files
 set(SOURCE_FILES
     src/main.cpp
+    src/FaceDetection.cpp
 )
 
 # Add executable

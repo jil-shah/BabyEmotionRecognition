@@ -123,6 +123,33 @@ FacialEmotionRecognition/fast:
 	$(MAKE) -f CMakeFiles/FacialEmotionRecognition.dir/build.make CMakeFiles/FacialEmotionRecognition.dir/build
 .PHONY : FacialEmotionRecognition/fast
 
+src/FaceDetection.o: src/FaceDetection.cpp.o
+
+.PHONY : src/FaceDetection.o
+
+# target to build an object file
+src/FaceDetection.cpp.o:
+	$(MAKE) -f CMakeFiles/FacialEmotionRecognition.dir/build.make CMakeFiles/FacialEmotionRecognition.dir/src/FaceDetection.cpp.o
+.PHONY : src/FaceDetection.cpp.o
+
+src/FaceDetection.i: src/FaceDetection.cpp.i
+
+.PHONY : src/FaceDetection.i
+
+# target to preprocess a source file
+src/FaceDetection.cpp.i:
+	$(MAKE) -f CMakeFiles/FacialEmotionRecognition.dir/build.make CMakeFiles/FacialEmotionRecognition.dir/src/FaceDetection.cpp.i
+.PHONY : src/FaceDetection.cpp.i
+
+src/FaceDetection.s: src/FaceDetection.cpp.s
+
+.PHONY : src/FaceDetection.s
+
+# target to generate assembly for a file
+src/FaceDetection.cpp.s:
+	$(MAKE) -f CMakeFiles/FacialEmotionRecognition.dir/build.make CMakeFiles/FacialEmotionRecognition.dir/src/FaceDetection.cpp.s
+.PHONY : src/FaceDetection.cpp.s
+
 src/main.o: src/main.cpp.o
 
 .PHONY : src/main.o
@@ -159,6 +186,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... FacialEmotionRecognition"
+	@echo "... src/FaceDetection.o"
+	@echo "... src/FaceDetection.i"
+	@echo "... src/FaceDetection.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

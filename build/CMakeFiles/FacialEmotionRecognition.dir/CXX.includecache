@@ -6,10 +6,20 @@
 
 #IncludeRegexTransform: 
 
+/media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/src/FaceDetection.h
+opencv2/opencv.hpp
+-
+vector
+/media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/src/vector
+
 /media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/src/main.cpp
+FaceDetection.h
+/media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/src/FaceDetection.h
 opencv2/opencv.hpp
 -
 iostream
+-
+chrono
 -
 
 /usr/include/opencv4/opencv2/calib3d.hpp

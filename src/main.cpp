@@ -1,10 +1,14 @@
+#include "FaceDetection.h"
 #include <opencv2/opencv.hpp>
 #include <iostream>
+#include <chrono>
 
-const std::string APP = "Baby Emotion Recognition Software";
 int main(){
+    std::string CASCADE_PATH = "../model/haarcascade_frontalface_alt2.xml";
+    std::string APP = "Baby Emotion Recognition Software";
+
     std::cerr << "Baby Emotion Recognition Software Enabled" << std::endl;
-    
+    FaceDetection FaceDetection(CASCADE_PATH);
     // initialize the video frame
     cv::Mat frame;
 
@@ -33,6 +37,12 @@ int main(){
             continue;
         }
 
+        //detect faces
+        auto faces = FaceDetection.detectFaces(frame);
+        for(const auto& face : faces) {
+            cv::Mat faceROI = frame(face);
+            FaceDetection.drawFace(frame, face);
+        }
         //display live video without processing
         cv::imshow(APP, frame);
 
