@@ -123,6 +123,33 @@ FacialEmotionRecognition/fast:
 	$(MAKE) -f CMakeFiles/FacialEmotionRecognition.dir/build.make CMakeFiles/FacialEmotionRecognition.dir/build
 .PHONY : FacialEmotionRecognition/fast
 
+src/EmotionRecognizer.o: src/EmotionRecognizer.cpp.o
+
+.PHONY : src/EmotionRecognizer.o
+
+# target to build an object file
+src/EmotionRecognizer.cpp.o:
+	$(MAKE) -f CMakeFiles/FacialEmotionRecognition.dir/build.make CMakeFiles/FacialEmotionRecognition.dir/src/EmotionRecognizer.cpp.o
+.PHONY : src/EmotionRecognizer.cpp.o
+
+src/EmotionRecognizer.i: src/EmotionRecognizer.cpp.i
+
+.PHONY : src/EmotionRecognizer.i
+
+# target to preprocess a source file
+src/EmotionRecognizer.cpp.i:
+	$(MAKE) -f CMakeFiles/FacialEmotionRecognition.dir/build.make CMakeFiles/FacialEmotionRecognition.dir/src/EmotionRecognizer.cpp.i
+.PHONY : src/EmotionRecognizer.cpp.i
+
+src/EmotionRecognizer.s: src/EmotionRecognizer.cpp.s
+
+.PHONY : src/EmotionRecognizer.s
+
+# target to generate assembly for a file
+src/EmotionRecognizer.cpp.s:
+	$(MAKE) -f CMakeFiles/FacialEmotionRecognition.dir/build.make CMakeFiles/FacialEmotionRecognition.dir/src/EmotionRecognizer.cpp.s
+.PHONY : src/EmotionRecognizer.cpp.s
+
 src/FaceDetection.o: src/FaceDetection.cpp.o
 
 .PHONY : src/FaceDetection.o
@@ -186,6 +213,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... FacialEmotionRecognition"
+	@echo "... src/EmotionRecognizer.o"
+	@echo "... src/EmotionRecognizer.i"
+	@echo "... src/EmotionRecognizer.s"
 	@echo "... src/FaceDetection.o"
 	@echo "... src/FaceDetection.i"
 	@echo "... src/FaceDetection.s"

@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/FacialEmotionRecognition.dir/src/EmotionRecognizer.cpp.o"
   "CMakeFiles/FacialEmotionRecognition.dir/src/FaceDetection.cpp.o"
   "CMakeFiles/FacialEmotionRecognition.dir/src/main.cpp.o"
   "FacialEmotionRecognition"

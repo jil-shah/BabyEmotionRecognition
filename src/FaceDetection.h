@@ -9,7 +9,7 @@ public:
     FaceDetection(const std::string& cascadePath);
     std::vector<cv::Rect> detectFaces (const cv::Mat& frame);
     void drawFace(cv::Mat& frame, const cv::Rect& face);
-
+    void drawFace(cv::Mat& frame, const cv::Rect& face, const std::string& label);
 
 private:
     cv::CascadeClassifier faceCascade;

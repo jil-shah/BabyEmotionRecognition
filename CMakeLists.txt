@@ -18,6 +18,7 @@ include_directories(${OpenCV_INCLUDE_DIRS} include)
 set(SOURCE_FILES
     src/main.cpp
     src/FaceDetection.cpp
+    src/EmotionRecognizer.cpp
 )
 
 # Add executable

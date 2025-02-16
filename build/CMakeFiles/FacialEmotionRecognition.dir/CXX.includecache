@@ -6,6 +6,26 @@
 
 #IncludeRegexTransform: 
 
+/media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/src/EmotionRecognizer.cpp
+EmotionRecognizer.h
+/media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/src/EmotionRecognizer.h
+opencv2/opencv.hpp
+-
+iostream
+-
+
+/media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/src/EmotionRecognizer.h
+opencv2/opencv.hpp
+-
+opencv2/dnn.hpp
+-
+vector
+-
+string
+-
+unordered_map
+-
+
 /media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/src/FaceDetection.h
 opencv2/opencv.hpp
 -
@@ -15,6 +35,8 @@ vector
 /media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/src/main.cpp
 FaceDetection.h
 /media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/src/FaceDetection.h
+EmotionRecognizer.h
+/media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/src/EmotionRecognizer.h
 opencv2/opencv.hpp
 -
 iostream

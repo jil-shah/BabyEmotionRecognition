@@ -1,4 +1,5 @@
 #include "FaceDetection.h"
+#include "EmotionRecognizer.h"
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <chrono>
@@ -6,9 +7,11 @@
 int main(){
     std::string CASCADE_PATH = "../model/haarcascade_frontalface_alt2.xml";
     std::string APP = "Baby Emotion Recognition Software";
+    std::string MODEL_PATH = "../model/tensorflow_model.pb";  // Updated to match your model
 
     std::cerr << "Baby Emotion Recognition Software Enabled" << std::endl;
     FaceDetection FaceDetection(CASCADE_PATH);
+    EmotionRecognizer EmotionRecognizer(MODEL_PATH);
     // initialize the video frame
     cv::Mat frame;
 
@@ -25,7 +28,7 @@ int main(){
     //adjust frame due to slow VM processing time
     cap.set(cv::CAP_PROP_FRAME_WIDTH, 1280);  // Try 1280x720
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
-    cap.set(cv::CAP_PROP_FPS, 30);  // Set FPS to 30 for smoother video
+    cap.set(cv::CAP_PROP_FPS, 5);  // Set FPS to 30 for smoother video
     // Use MJPEG codec for a better opencv backend
     cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G')); 
 
@@ -41,7 +44,8 @@ int main(){
         auto faces = FaceDetection.detectFaces(frame);
         for(const auto& face : faces) {
             cv::Mat faceROI = frame(face);
-            FaceDetection.drawFace(frame, face);
+            std::vector<std::string> emotions = EmotionRecognizer.predict(faceROI);
+            FaceDetection.drawFace(frame, face, emotions[0]);
         }
         //display live video without processing
         cv::imshow(APP, frame);

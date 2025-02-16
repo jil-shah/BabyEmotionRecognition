@@ -22,3 +22,8 @@ std::vector<cv::Rect> FaceDetection::detectFaces(const cv::Mat& frame){
 void FaceDetection::drawFace(cv::Mat& frame, const cv::Rect& face){
     cv::rectangle(frame, face, cv::Scalar(0,255,0), 2);
 }
+
+void FaceDetection::drawFace(cv::Mat& frame, const cv::Rect& face, const std::string& label) {
+    cv::rectangle(frame, face, cv::Scalar(0, 255, 0), 2);
+    cv::putText(frame, label, cv::Point(face.x, face.y - 10), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2);
+}
