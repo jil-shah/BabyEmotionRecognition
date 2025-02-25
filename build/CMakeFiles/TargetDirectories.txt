@@ -1,3 +1,0 @@
-/media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/build/CMakeFiles/rebuild_cache.dir
-/media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/build/CMakeFiles/edit_cache.dir
-/media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/build/CMakeFiles/FacialEmotionRecognition.dir

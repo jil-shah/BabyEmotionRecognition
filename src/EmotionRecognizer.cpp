@@ -1,6 +1,5 @@
-#include "EmotionRecognizer.h"
-#include <opencv2/opencv.hpp>
-#include <iostream>
+#include "../include/EmotionRecognizer.h"
+
 
 EmotionRecognizer::EmotionRecognizer(const std::string& modelPath)
     : network(cv::dnn::readNet(modelPath)), // Load the TensorFlow model
