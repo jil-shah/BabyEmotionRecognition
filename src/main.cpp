@@ -1,10 +1,27 @@
-#include "FaceDetection.h"
-#include "EmotionRecognizer.h"
+#include "../include/FaceDetection.h"
+#include "../include/EmotionRecognizer.h"
+#include "../include/Record_BabySounds.h"
+#include "../include/ADProcess_BabySounds.h"
 #include <opencv2/opencv.hpp>
-#include <iostream>
 #include <chrono>
+#include <stdlib.h>
+#include <iostream>
+#include <vector>
+#include <filesystem>
+#include <string>
+
 
 int main(){
+
+    // Sound Detection Stuff
+    /* record function has an error
+    record();
+    std::vector<float> mfcc = extract_mfcc(ADP_FILENAME);
+    std::cout << "MFCC Features extracted\n";
+    export_mfccFile(mfcc, MFCC_FILE);
+    pyPredict_Emotions();
+    */
+
     std::string CASCADE_PATH = "../model/haarcascade_frontalface_alt2.xml";
     std::string APP = "Baby Emotion Recognition Software";
     std::string MODEL_PATH = "../model/tensorflow_model.pb";  // Updated to match your model

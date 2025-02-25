@@ -1,12 +1,12 @@
 #ifndef EMOTIONRECOGNIZER_H
 #define EMOTIONRECOGNIZER_H
 
-#include <opencv2/opencv.hpp>
+#include <opencv2/opencv.hpp> // import opencv files 
 #include <opencv2/dnn.hpp>
 #include <vector>
 #include <string>
 #include <unordered_map>
-
+#include <iostream>
 class EmotionRecognizer {
 public:
     explicit EmotionRecognizer(const std::string& modelPath);
