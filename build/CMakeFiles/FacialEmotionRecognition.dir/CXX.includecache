@@ -6,14 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/src/EmotionRecognizer.cpp
-EmotionRecognizer.h
-/media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/src/EmotionRecognizer.h
-opencv2/opencv.hpp
--
-iostream
--
-
 /media/sf_SharedVM/CapstoneJilsVersion/BabyEmotionRecognition/src/EmotionRecognizer.h
 opencv2/opencv.hpp
 -

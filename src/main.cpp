@@ -45,6 +45,11 @@ int main(){
         for(const auto& face : faces) {
             cv::Mat faceROI = frame(face);
             std::vector<std::string> emotions = EmotionRecognizer.predict(faceROI);
+            
+            //STRING FOR API
+            //std::string detectedEmotion = emotions[1];
+            //std::cerr << "Detected Emotion: " << detectedEmotion << std::endl;
+            
             FaceDetection.drawFace(frame, face, emotions[0]);
         }
         //display live video without processing
