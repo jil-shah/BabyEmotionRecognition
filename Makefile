@@ -3,7 +3,7 @@ CXX = g++
 
 # Include and Library Flags
 PKG_CONFIG = `pkg-config --cflags --libs opencv4`
-LIBS = -lportaudio -lsndfile -laubio -lpython3.12
+LIBS = -lportaudio -lsndfile -laubio 
 
 # Source and Output
 SRC_DIR = src
@@ -27,7 +27,7 @@ $(OUTPUT):$(OBJ_FILES)
 	$(CXX) $(OBJ_FILES) -o $(OUTPUT) $(PKG_CONFIG) $(LIBS)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
-		$(CXX) -I$(INCLUDE_DIR) -I/home/ghosttt/venv/include/python3.12 -L/home/ghosttt/venv/lib -c $< -o $@ $(PKG_CONFIG) $(LIBS)
+		$(CXX) -I$(INCLUDE_DIR) -c $< -o $@ $(PKG_CONFIG) $(LIBS)
 
 
 # Compilation rule to compile .cpp -> .o
