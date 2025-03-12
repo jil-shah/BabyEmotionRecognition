@@ -21,6 +21,10 @@ int main(){
     export_mfccFile(mfcc, MFCC_FILE);
     pyPredict_Emotions();
     */
+    record(); 
+    std::vector<float> mfcc = extract_mfcc(ADP_FILENAME);
+    std::cout << "MFCC Features extracted\n";
+    export_mfccFile(mfcc, MFCC_FILE);
 
     std::string CASCADE_PATH = "../model/haarcascade_frontalface_alt2.xml";
     std::string APP = "Baby Emotion Recognition Software";

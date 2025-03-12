@@ -3,8 +3,9 @@
 #include <aubio/aubio.h>
 #include <sndfile.h>
 #include <fstream>
-#include <python3.12/Python.h>
+//#include <python3.12/Python.h>
 #include <filesystem>
+//#include "../librosa/librosa.h"
 #include <cmath>
 #include <limits>
 
@@ -14,14 +15,14 @@
 #define N_FILTERS 42       // Match Librosa Mel filters (N_MFCC + 2)
 #define N_MFCC 40          // Number of MFCC coefficients
 
-#define ADP_FILENAME "/home/ghosttt/BabyEmotionRecognition/data/testing_data/discomfort.wav"
-#define MFCC_FILE "/home/ghosttt/BabyEmotionRecognition/output/mfcc_features.txt"
+#define ADP_FILENAME "/home/ghosttt/Baby-Beacon-Sound-Emotion/data/testing_data/belly_pain.wav"
+#define MFCC_FILE "/home/ghosttt/Baby-Beacon-Sound-Emotion/output/mfcc_features.txt"
 #define SITE_PACKAGES "sys.path.append('/home/ghosttt/venv/lib/python3.12/site-packages')"
-#define PYTHON_SCRIPT "sys.path.append('/home/ghosttt/BabyEmotionRecognition/python')"
-#define PY_FILE "symptomPrediction"
+#define PYTHON_SCRIPT "sys.path.append('/home/ghosttt/Baby-Beacon-Sound-Emotion/python')"
+#define PY_FILE "testingModel"
 
 std::vector<float> extract_mfcc2(const char* filename);
 int export_mfccFile(std::vector<float> mfcc_features, const char* txtFile);
-int pyPredict_Emotions();
+//int pyPredict_Emotions();
 
 std::vector<float> extract_mfcc(const char* filename);
