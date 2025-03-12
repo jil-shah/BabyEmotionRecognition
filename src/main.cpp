@@ -14,13 +14,7 @@
 int main(){
 
     // Sound Detection Stuff
-    /* record function has an error
-    record();
-    std::vector<float> mfcc = extract_mfcc(ADP_FILENAME);
-    std::cout << "MFCC Features extracted\n";
-    export_mfccFile(mfcc, MFCC_FILE);
-    pyPredict_Emotions();
-    */
+    
     record(); 
     std::vector<float> mfcc = extract_mfcc(ADP_FILENAME);
     std::cout << "MFCC Features extracted\n";
@@ -72,10 +66,12 @@ int main(){
         cv::imshow(APP, frame);
 
         if(cv::waitKey(1) == 'q') break;
-
     }
 
     cap.release();
     cv::destroyAllWindows();
+
+    std::string sound_symptom = readPredication(INPUT_FILE); // get the emotion from the text file created by Python Component
+
     return 0;
 }

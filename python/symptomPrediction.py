@@ -4,7 +4,7 @@ import librosa
 import numpy as np
 import tensorflow as tf
 import keras
-
+import os
 # CONSTANTS ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 """
 DIR = "C:\\Users\\shivt\\Documents\\GitHub\\Baby-Beacon-Sound-Emotion\\"
@@ -12,9 +12,14 @@ DIR = "C:\\Users\\shivt\\Code\\BabyBeacon\\Baby-Beacon-Sound-Emotion\\"
 AUDIO_PATH = DIR+"data\\testing_data"
 MODEL_PATH = DIR + "model\\"
 """
-DIR = "/home/ghosttt/BabyEmotionRecognition/"
+""" DIR = "/home/ghosttt/BabyEmotionRecognition/"
+AUDIO_PATH = DIR+"/data/testing_data"
+MODEL_PATH = DIR + "/model/" """
+
+DIR = os.getcwd()
 AUDIO_PATH = DIR+"/data/testing_data"
 MODEL_PATH = DIR + "/model/"
+
 
 SAMPLE_RATE = 22050  # Sample rate for librosa
 DURATION = 6       # Duration of the audio file (seconds)
