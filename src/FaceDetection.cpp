@@ -1,7 +1,4 @@
-#include <opencv2/opencv.hpp>
-
-#include "FaceDetection.h"
-#include <iostream>
+#include "../include/FaceDetection.h"
 
 FaceDetection:: FaceDetection(const std::string& cascadePath) {
 
