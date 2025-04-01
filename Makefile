@@ -1,9 +1,9 @@
 # Compiler
 CXX = g++
-
+CXXFLAGS = -std=c++17 -Wall
 # Include and Library Flags
 PKG_CONFIG = `pkg-config --cflags --libs opencv4`
-LIBS = -lportaudio -lsndfile -laubio -pthread
+LIBS = -lportaudio -lsndfile -laubio -pthread -lcpr -lcurl
 
 # Source and Output
 SRC_DIR = src
@@ -11,10 +11,10 @@ BUILD_DIR = build
 INCLUDE_DIR = include
 
 #Source Files 
-SRC_FILES = $(SRC_DIR)/main.cpp $(SRC_DIR)/Record_BabySounds.cpp $(SRC_DIR)/ADProcess_BabySounds.cpp $(SRC_DIR)/EmotionRecognizer.cpp $(SRC_DIR)/FaceDetection.cpp
+SRC_FILES = $(SRC_DIR)/main.cpp $(SRC_DIR)/Record_BabySounds.cpp $(SRC_DIR)/ADProcess_BabySounds.cpp $(SRC_DIR)/EmotionRecognizer.cpp $(SRC_DIR)/FaceDetection.cpp $(SRC_DIR)/cppscript.cpp $(SRC_DIR)/rides_creator.cpp
 
 #Object Files
-OBJ_FILES = $(BUILD_DIR)/main.o $(BUILD_DIR)/Record_BabySounds.o $(BUILD_DIR)/ADProcess_BabySounds.o $(BUILD_DIR)/EmotionRecognizer.o $(BUILD_DIR)/FaceDetection.o
+OBJ_FILES = $(BUILD_DIR)/main.o $(BUILD_DIR)/Record_BabySounds.o $(BUILD_DIR)/ADProcess_BabySounds.o $(BUILD_DIR)/EmotionRecognizer.o $(BUILD_DIR)/FaceDetection.o $(BUILD_DIR)/cppscript.o $(BUILD_DIR)/rides_creator.o
 
 # OUTPUT exe
 OUTPUT = BabySounds
@@ -24,15 +24,15 @@ all: $(OUTPUT)
 
 # Compilation rule for exe
 $(OUTPUT):$(OBJ_FILES)
-	$(CXX) -std=c++17 $(OBJ_FILES) -o $(OUTPUT) $(PKG_CONFIG) $(LIBS)
+	$(CXX) $(CXXFLAGS) $(OBJ_FILES) -o $(OUTPUT) $(PKG_CONFIG) $(LIBS)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
-		$(CXX) -std=c++17 -I$(INCLUDE_DIR) -c $< -o $@ $(PKG_CONFIG) $(LIBS)
+		$(CXX) $(CXXFLAGS) -I$(INCLUDE_DIR) -c $< -o $@ $(PKG_CONFIG) $(LIBS)
 
 
 # Compilation rule to compile .cpp -> .o
 $(OUTPUT): $(SRC_DIR)
-	$(CXX) -std=c++17 $(SRC_FILES) -o $(OUTPUT) $(PKG_CONFIG) $(LIBS)
+	$(CXX) $(CXXFLAGS) $(SRC_FILES) -o $(OUTPUT) $(PKG_CONFIG) $(LIBS)
 
 # Ensure the build directory exists
 $(BUILD_DIR):
