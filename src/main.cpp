@@ -161,13 +161,11 @@ void uploadScanToRide(int rideId, int scanCount) {
         cpr::Body{updatedRideData.dump()}
     );
 
-    if (patchResponse.status_code == 200) {
-        std::cout << "📡 Scan " << scanCount << " added: " 
-                  << selectedEmotion << " + " << selectedSound 
-                  << " Accuracy: " << accuracy << "%\n";
+    /*if (patchResponse.status_code == 200) {
+        std::cout << "📡 Scan " << scanCount << " added: " << selectedEmotion << " + " << selectedSound << " Accuracy: " << accuracy << "%\n";
     } else {
         std::cerr << "❌ Failed to upload scan " << scanCount << "! Response: " << patchResponse.text << std::endl;
-    }
+    }*/
 }
 
 void uploadScanToRide_Old(int rideId, int scanCount) {
@@ -417,7 +415,7 @@ void endRide(int rideId) {
 }
 
 void scanningWorkflow() {
-    while (true) {
+    //while (true) {
         if (scanningActive.load()) {
             std::cout << "🚀 Scanning started..." << std::endl;
 
@@ -456,7 +454,7 @@ void scanningWorkflow() {
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
         std::cout << "Status: " << scanningActive.load() << " *\n";
-    }
+    //}
 }
 
 void signalHandler(int signum) {
@@ -466,7 +464,7 @@ void signalHandler(int signum) {
 }
 
 void monitorDeviceStatus() {
-    while (true) {
+    //while (true) {
         std::string status = getDeviceField("status");
         std::cout << "🔍 Current Status: " << status << std::endl;
         
@@ -479,7 +477,7 @@ void monitorDeviceStatus() {
             std::cout << "🛑 Status changed to IDLE. Stopping scan process..." << std::endl;
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
+   // }
 }
 
 int SymptomDetection(std::promise<std::string> prom){  
@@ -574,36 +572,42 @@ int main(){
         std::thread monitorThread(monitorDeviceStatus);
         std::thread scanThread(scanningWorkflow);
 
+
+        std::cout << "Monitor Thread Start ....\n";
         monitorThread.join();
-        scanThread.join();    
+        std::cout << "Scan Thread Start ....\n";
+        scanThread.join();
+        std::cout << "Symptom Detect Thread Start ....\n";
         symptomDetect.join();
+        std::cout << "Emotion Detect Thread Start ....\n";
         emotionDetect.join();
 
         std::cout << "------------------------------------------------------------\n";
+        std::string predicted_symptom; 
         try{
-            std::string predicted_symptom = fut_sym.get();
+            predicted_symptom = fut_sym.get();
         }catch (const std::exception& e){
-            std::cout << "Symptom Empty\n" ;
+            std::cout << "Symptom Empty\n";
         }
         try{
             std::string detected_emotion = fut_emo.get();
             std::vector<std::string> emotion_parsed = split_string(detected_emotion);
   
-            if ( (emotion_parsed[0] != previous_emotion)
-            || (predicted_symptom != previous_sympton)
-            ){
+            if ( (emotion_parsed[0] != previous_emotion) || (predicted_symptom != previous_sympton)){
                 flag = __cpp_lib_allocator_traits_is_always_equal; 
                 previous_emotion = emotion_parsed[0];
                 previous_sympton = predicted_symptom;
-                previous_acc = static_cast<int>(std::round(emotion_parsed[1]));
+                previous_acc = std::stoi(emotion_parsed[1]);
                 std::cout << "Emotion = " << previous_emotion<< std::endl;
                 std::cout << "Symptom = " << previous_sympton << std::endl; 
-                std::cout << "Emotion Accuracy = " << previous_acc << std::endl;   
+                std::cout << "Emotion Accuracy = " << previous_acc << std::endl; 
+                flag = true;  
             } else{
                 flag = false;
             }
         }catch (const std::exception& e){
             std::cout << "Emotion Empty Frame\n" ;
+            flag = false;
         }
 
         std::cout << "------------------------------------------------------------\n";
