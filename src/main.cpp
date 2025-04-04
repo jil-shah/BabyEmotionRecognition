@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include <atomic>
 #include <csignal>
+#include <mutex> 
 
 const std::string PROJECT_ID = "babybeacon-2025";
 const std::string API_KEY = "AIzaSyD_VEzYSS6iYYOMX2TeUkTJeWESkLjmWU0";
@@ -39,8 +40,11 @@ std::string previous_emotion = "";
 int previous_acc = 0; 
 
 
+std::mutex mtx; 
+std::condition_variable cv_sound_emotion; 
 // Symptom Detection Thread Global Variables
 std::string sound_symptom = ""; 
+bool sound_ready = false; 
 bool symptom_flag = false; 
 
 // Emotion Detection Thread Global Variables
@@ -451,8 +455,9 @@ void scanningWorkflow() {
             for (int scanCount = 1; !stopScanning.load(); ++scanCount) {
                 std::cout << "Uploading scan " << scanCount << "...\n";
                 // Ensure scans are uploaded under the ride in the `rides` subcollection of the device
-                if (flag == true){
+                if (symptom_flag == true && emotion_flag == true){
                     uploadScanToRide(lastRideId, scanCount);
+                    
                 }
 
                 std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -510,7 +515,9 @@ std::vector<std::string> split_string(std::string input){
 void SymptomDetection(){  
     
     while(true){
+                
         record(); 
+        
         std::vector<float> mfcc = extract_mfcc(ADP_FILENAME);
         std::cout << "MFCC Features extracted\n";
         export_mfccFile(mfcc, MFCC_FILE);
@@ -522,15 +529,19 @@ void SymptomDetection(){
         sound_symptom = readPredication(INPUT_FILE); // get the emotion from the text file created by Python Component
     
     
+        std::unique_lock<std::mutex> lock(mtx);
+    
         std::cout << "------------------------------------------------------------\n";
         std::cout << "Symptom = " << sound_symptom << std::endl; 
         std::cout << "------------------------------------------------------------\n";
 
-    
-        if(sound_symptom != previous_sympton){
-            symptom_flag = __cpp_lib_allocator_traits_is_always_equal; 
-            previous_sympton = sound_symptom;
+        sound_ready = true;
+        cv_sound_emotion.notify_one(); 
 
+        if(sound_symptom != previous_sympton){
+            symptom_flag = true; 
+            previous_sympton = sound_symptom;
+            
         }else{
             symptom_flag = false; 
         }
@@ -565,7 +576,10 @@ void EmotionDetection(){
         cap.set(cv::CAP_PROP_FPS, 5);  // Set FPS to 30 for smoother video
         // Use MJPEG codec for a better opencv backend
         cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G')); 
-            
+        
+        
+     
+        
         //read a new frame
         cap >> frame;
         int x = 0; 
@@ -596,12 +610,13 @@ void EmotionDetection(){
 
         }
         
-        cv::imshow(APP,frame);
+        //cv::imshow(APP,frame);
         cap.release();  
         
         // process emotion and parse 
         
-        
+        std::unique_lock<std::mutex> lock(mtx);
+        cv_sound_emotion.wait(lock,[] {return sound_ready;});
        
         std::cout << "------------------------------------------------------------\n";
         std::cout << "Emotion = " << emotion_detected << std::endl;
@@ -609,8 +624,10 @@ void EmotionDetection(){
         std::cout << "------------------------------------------------------------\n";
 
         
+        sound_ready = false; 
+
         if(emotion_detected!= previous_emotion){
-            flag = __cpp_lib_allocator_traits_is_always_equal;
+            emotion_flag = true;
             previous_emotion = emotion_detected;
             previous_acc = std::stoi(emotion_accuracy);
         }else{
