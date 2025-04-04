@@ -7,4 +7,4 @@ lxterminal --working-directory=/home/raspberry/BabyEmotionRecognition/python --c
 sleep 3
 
 # Open terminal for C++ program
-lxterminal --working-directory=/home/raspberry/BabyEmotionRecognition --command="bash -c 'make && ./BabyBeacon; exec bash'"
+lxterminal --working-directory=/home/raspberry/BabyEmotionRecognition --command="bash -c './BabyBeacon; exec bash'"
