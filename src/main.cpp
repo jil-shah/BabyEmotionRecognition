@@ -44,7 +44,8 @@ std::string sound_symptom = "";
 bool symptom_flag = false; 
 
 // Emotion Detection Thread Global Variables
-std::string emotion_detected = "";
+std::string emotion_detected = "Neutral";
+std::string emotion_accuracy = "0"; 
 bool emotion_flag = false; 
 
 
@@ -158,9 +159,9 @@ void uploadScanToRide(int rideId, int scanCount) {
     updatedRideData["fields"][scanKey] = {
         {"mapValue", {
             {"fields", {
-                {"accuracy", { {"integerValue", previous_acc} }},
-                {"emotion", { {"stringValue", previous_emotion} }},
-                {"emotion_sound", { {"stringValue", previous_sympton} }}
+                {"accuracy", { {"integerValue", emotion_accuracy} }},
+                {"emotion", { {"stringValue", emotion_detected} }},
+                {"emotion_sound", { {"stringValue", sound_symptom} }}
             }}
         }}
     };
@@ -502,7 +503,7 @@ std::vector<std::string> split_string(std::string input){
         return {emotion, accuracy}; 
     }else{
         std::cout << "Cannot Parse No Colon Found\n";
-        return {input};
+        return {"Neutral", "0"};
     }
 }
 
@@ -522,7 +523,7 @@ void SymptomDetection(){
     
     
         std::cout << "------------------------------------------------------------\n";
-        std::cout << "Symptom = " << previous_sympton << std::endl; 
+        std::cout << "Symptom = " << sound_symptom << std::endl; 
         std::cout << "------------------------------------------------------------\n";
 
     
@@ -552,6 +553,7 @@ void EmotionDetection(){
         cv::VideoCapture cap(0, cv::CAP_V4L2);
         if(!cap.isOpened()) {
             std::cerr << "Error: Unable to open web camera" << std::endl;
+            continue; 
         }
 
         // create the window
@@ -566,37 +568,51 @@ void EmotionDetection(){
             
         //read a new frame
         cap >> frame;
+        int x = 0; 
         if(frame.empty()){
             std::cerr << "Error: Empty frame received" << std::endl;
-            exit(1);
+            //exit(1);
+            
+            emotion_detected = "Neutral";
+            emotion_accuracy = "0";
+            x = 1;
         }
         
         //detect faces
-        auto faces = FaceDetection.detectFaces(frame);
-        for(const auto& face : faces) {
-            cv::Mat faceROI = frame(face);
-            std::vector<std::string> emotions = EmotionRecognizer.predict(faceROI);
-            FaceDetection.drawFace(frame, face, emotions[0]);
-            emotion_detected = emotions[0];
-            break;
+        if(x == 0){
+            auto faces = FaceDetection.detectFaces(frame);
+            for(const auto& face : faces) {
+                cv::Mat faceROI = frame(face);
+                std::vector<std::string> emotions = EmotionRecognizer.predict(faceROI);
+                FaceDetection.drawFace(frame, face, emotions[0]);
+                emotion_detected = emotions[0];
+                break;
+            }
+            x = 0; 
+            
+            std::vector<std::string> emotion_parsed = split_string(emotion_detected);
+            emotion_detected = emotion_parsed[0]; 
+            emotion_accuracy = emotion_parsed[1]; 
+
         }
+        
+        cv::imshow(APP,frame);
         cap.release();  
         
         // process emotion and parse 
         
-        std::vector<std::string> emotion_parsed = split_string(emotion_detected);
         
        
         std::cout << "------------------------------------------------------------\n";
-        std::cout << "Emotion = " << previous_emotion<< std::endl;
-        std::cout << "Emotion Accuracy = " << previous_acc << std::endl; 
+        std::cout << "Emotion = " << emotion_detected << std::endl;
+        std::cout << "Emotion Accuracy = " << emotion_accuracy << std::endl; 
         std::cout << "------------------------------------------------------------\n";
 
         
-        if(emotion_parsed[0] != previous_emotion){
+        if(emotion_detected!= previous_emotion){
             flag = __cpp_lib_allocator_traits_is_always_equal;
-            previous_emotion = emotion_parsed[0];
-            previous_acc = std::stoi(emotion_parsed[1]);
+            previous_emotion = emotion_detected;
+            previous_acc = std::stoi(emotion_accuracy);
         }else{
             flag = false; 
         }
