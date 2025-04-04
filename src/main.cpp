@@ -38,6 +38,16 @@ std::string previous_sympton = "";
 std::string previous_emotion = "";
 int previous_acc = 0; 
 
+
+// Symptom Detection Thread Global Variables
+std::string sound_symptom = ""; 
+bool symptom_flag = false; 
+
+// Emotion Detection Thread Global Variables
+std::string emotion_detected = "";
+bool emotion_flag = false; 
+
+
 bool flag = false;
 
 std::string getCurrentTimestamp() {
@@ -62,13 +72,13 @@ std::string getDeviceField(const std::string& field) {
             }
         }
     }
-    std::cerr << "⚠️ Failed to fetch " << field << " | Status Code: " << response.status_code << " | Response: " << response.text << std::endl;
+    std::cerr << "!!! Failed to fetch " << field << " | Status Code: " << response.status_code << " | Response: " << response.text << std::endl;
     return "";
 }
 
 std::string getUserField(const std::string& field) {
     if (username.empty()) {
-        std::cerr << "⚠️ Cannot fetch " << field << ". Username not set.\n";
+        std::cerr << "!!!️ Cannot fetch " << field << ". Username not set.\n";
         return "";
     }
 
@@ -90,7 +100,7 @@ std::string getUserField(const std::string& field) {
         }
     }
 
-    std::cerr << "⚠️ Failed to fetch " << field << " from users | Status Code: " 
+    std::cerr << "!!! Failed to fetch " << field << " from users | Status Code: " 
               << response.status_code << " | Response: " << response.text << std::endl;
     return "";
 }
@@ -99,8 +109,8 @@ int fetchLastRideId() {
     std::string url = BASE_URL + "/users/" + username + "?key=" + API_KEY;
     auto response = cpr::Get(cpr::Url{url});
 
-    std::cout << "📡 Fetching last ride ID from: " << url << std::endl;
-    std::cout << "🔍 Raw Firestore Response: " << response.text << std::endl;
+    std::cout << "~~~ Fetching last ride ID from: " << url << std::endl;
+    std::cout << "~~~ Raw Firestore Response: " << response.text << std::endl;
 
     if (response.status_code == 200) {
         json userJson = json::parse(response.text);
@@ -112,18 +122,19 @@ int fetchLastRideId() {
                 // Force Firestore to treat `last_ride_Id` as a string
                 if (lastRideField.contains("stringValue")) {
                     int rideId = std::stoi(lastRideField["stringValue"].get<std::string>());
-                    std::cout << "✅ last_ride_Id (retrieved as string, converted to int): " << rideId << std::endl;
+                    std::cout << "last_ride_Id (retrieved as string, converted to int): " << rideId << std::endl;
                     return rideId;
                 }
             } catch (const std::exception& e) {
-                std::cerr << "❌ Error converting last_ride_Id to int: " << e.what() << std::endl;
+                std::cerr << "!!! Error converting last_ride_Id to int: " << e.what() << std::endl;
             }
         }
     }
 
-    std::cerr << "⚠️ Failed to fetch last ride ID! Defaulting to 0.\n";
+    std::cerr << "!!! Failed to fetch last ride ID! Defaulting to 0.\n";
     return 0;
 }
+
 void uploadScanToRide(int rideId, int scanCount) {
     // Firestore URL
     std::string url = BASE_URL + "/devices/" + DEVICE_ID + "/rides/ride_" + std::to_string(rideId) + "?key=" + API_KEY;
@@ -131,7 +142,7 @@ void uploadScanToRide(int rideId, int scanCount) {
     // Fetch ride document
     auto response = cpr::Get(cpr::Url{url});
     if (response.status_code != 200) {
-        std::cerr << "❌ Failed to fetch ride document! Response: " << response.text << std::endl;
+        std::cerr << "!!! Failed to fetch ride document! Response: " << response.text << std::endl;
         return;
     }
 
@@ -226,7 +237,7 @@ void uploadScanToRide_Old(int rideId, int scanCount) {
     // Fetch ride document
     auto response = cpr::Get(cpr::Url{url});
     if (response.status_code != 200) {
-        std::cerr << "❌ Failed to fetch ride document! Response: " << response.text << std::endl;
+        std::cerr << "!!! Failed to fetch ride document! Response: " << response.text << std::endl;
         return;
     }
 
@@ -257,11 +268,11 @@ void uploadScanToRide_Old(int rideId, int scanCount) {
     );
 
     if (patchResponse.status_code == 200) {
-        std::cout << "📡 Scan " << scanCount << " added: " 
+        std::cout << "Scan " << scanCount << " added: " 
                   << selectedEmotion << " + " << selectedSound 
-                  << " Accuracy: " << accuracy << "%\n";
+                  << "Accuracy: " << accuracy << "%\n";
     } else {
-        std::cerr << "❌ Failed to upload scan " << scanCount << "! Response: " << patchResponse.text << std::endl;
+        std::cerr << "!!! Failed to upload scan " << scanCount << "! Response: " << patchResponse.text << std::endl;
     }
 }
 
@@ -282,9 +293,9 @@ void updateLastRideId(int rideId) {
     );
 
     if (response.status_code == 200) {
-        std::cout << "✅ Successfully updated last_ride_Id to " << rideId << " (stored as string in Firestore).\n";
+        std::cout << "Successfully updated last_ride_Id to " << rideId << " (stored as string in Firestore).\n";
     } else {
-        std::cerr << "❌ Failed to update last_ride_Id! Status Code: " << response.status_code 
+        std::cerr << "!!! Failed to update last_ride_Id! Status Code: " << response.status_code 
                   << " | Response: " << response.text << "\n";
     }
 }
@@ -294,27 +305,27 @@ void updateBabyRides(int rideId) {
 
     std::string url = BASE_URL + "/users/" + username + "/baby/" + scanningBaby + "?key=" + API_KEY;
 
-    // 🔍 Fetch the current baby document
+    // Fetch the current baby document
     auto response = cpr::Get(cpr::Url{url});
 
     if (response.status_code != 200) {
-        std::cerr << "❌ Failed to fetch baby document! Response: " << response.text << std::endl;
+        std::cerr << "!!! Failed to fetch baby document! Response: " << response.text << std::endl;
         return;
     }
 
-    // 📜 Parse the existing baby data
+    // Parse the existing baby data
     json babyData = json::parse(response.text);
 
-    // ✅ Preserve all existing fields
+    // Preserve all existing fields
     json updatedBabyData;
     if (babyData.contains("fields")) {
         updatedBabyData["fields"] = babyData["fields"]; // Copy all fields
     }
 
-    // 🆕 Prepare new ride entry
+    // Prepare new ride entry
     std::string rideString = "ride" + std::to_string(rideId);
 
-    // 📝 Append the new ride to the rides array
+    // Append the new ride to the rides array
     if (updatedBabyData["fields"].contains("rides") && updatedBabyData["fields"]["rides"].contains("arrayValue")) {
         updatedBabyData["fields"]["rides"]["arrayValue"]["values"].push_back({ {"stringValue", rideString} });
     } else {
@@ -323,7 +334,7 @@ void updateBabyRides(int rideId) {
         };
     }
 
-    // 🚀 Re-upload the full modified baby document
+    // Re-upload the full modified baby document
     auto patchResponse = cpr::Patch(
         cpr::Url{url},
         cpr::Header{{"Content-Type", "application/json"}},
@@ -331,9 +342,9 @@ void updateBabyRides(int rideId) {
     );
 
     if (patchResponse.status_code == 200) {
-        std::cout << "👶 Ride " << rideString << " added to baby profile successfully.\n";
+        std::cout << "Ride " << rideString << " added to baby profile successfully.\n";
     } else {
-        std::cerr << "❌ Failed to update baby rides! Response: " << patchResponse.text << std::endl;
+        std::cerr << "!!! Failed to update baby rides! Response: " << patchResponse.text << std::endl;
     }
 }
 
@@ -352,9 +363,9 @@ void setDeviceStatus(const std::string& status) {
     );
 
     if (response.status_code == 200) {
-        std::cout << "🔌 Device status updated to '" << status << "'\n";
+        std::cout << "Device status updated to '" << status << "'\n";
     } else {
-        std::cerr << "❌ Failed to update device status! " << response.text << std::endl;
+        std::cerr << "!!! Failed to update device status! " << response.text << std::endl;
     }
 }
 
@@ -365,7 +376,7 @@ void createNewRide(int rideId) {
         {"fields", {
             {"start_time", { {"stringValue", getCurrentTimestamp()} }},
             {"end_time", { {"stringValue", ""} }},
-            {"responses", {  // 🔥 Store responses as a map
+            {"responses", {  // Store responses as a map
                 {"mapValue", {
                     {"fields", {  // Placeholder for future response entries
                         {"example_response", { {"stringValue", "neutral"} }}  // Example entry
@@ -382,9 +393,9 @@ void createNewRide(int rideId) {
     );
 
     if (response.status_code == 200) {
-        std::cout << "✅ Ride " << rideId << " created successfully with response tracking.\n";
+        std::cout << "Ride " << rideId << " created successfully with response tracking.\n";
     } else {
-        std::cerr << "❌ Failed to create ride! Response: " << response.text << std::endl;
+        std::cerr << "!!! Failed to create ride! Response: " << response.text << std::endl;
     }
 }
 
@@ -410,23 +421,23 @@ void endRide(int rideId) {
         // Update last ride ID
         updateLastRideId(rideId);
     } else {
-        std::cerr << "❌ Failed to fetch ride data before ending ride! Status Code: " << response.status_code << std::endl;
+        std::cerr << "!!! Failed to fetch ride data before ending ride! Status Code: " << response.status_code << std::endl;
     }
 }
 
 void scanningWorkflow() {
-    //while (true) {
+    while (true) {
         if (scanningActive.load()) {
-            std::cout << "🚀 Scanning started..." << std::endl;
+            std::cout << "Scanning started..." << std::endl;
 
             username = getDeviceField("username");
-            std::cout << "👤 Username: " << username << std::endl;
+            std::cout << "Username: " << username << std::endl;
 
             lastRideId = fetchLastRideId() + 1;
-            std::cout << "🆕 New Ride ID: " << lastRideId << " (int)" << std::endl;
+            std::cout << "New Ride ID: " << lastRideId << " (int)" << std::endl;
 
             scanningBaby = getUserField("scanning_baby");
-            std::cout << "👶 Scanning Baby: " << scanningBaby << std::endl;
+            std::cout << "Scanning Baby: " << scanningBaby << std::endl;
 
             // Create a new ride in the device's rides subcollection
             createNewRide(lastRideId);
@@ -434,10 +445,10 @@ void scanningWorkflow() {
             // Update the baby's rides array with the new ride
             updateBabyRides(lastRideId);
 
-            std::cout << "🚀 Ride " << lastRideId << " started.\n";
+            std::cout << "Ride " << lastRideId << " started.\n";
 
             for (int scanCount = 1; !stopScanning.load(); ++scanCount) {
-                std::cout << "📡 Uploading scan " << scanCount << "...\n";
+                std::cout << "Uploading scan " << scanCount << "...\n";
                 // Ensure scans are uploaded under the ride in the `rides` subcollection of the device
                 if (flag == true){
                     uploadScanToRide(lastRideId, scanCount);
@@ -449,94 +460,37 @@ void scanningWorkflow() {
             endRide(lastRideId);
             scanningActive.store(false);
             stopScanning.store(false);
-            std::cout << "✅ Ride " << lastRideId << " ended.\n";
+            std::cout << "Ride " << lastRideId << " ended.\n";
         }
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
         std::cout << "Status: " << scanningActive.load() << " *\n";
-    //}
+    }
 }
 
 void signalHandler(int signum) {
-    std::cout << "\n🔌 Caught signal (" << signum << "). Shutting down...\n";
+    std::cout << "\nCaught signal (" << signum << "). Shutting down...\n";
     setDeviceStatus("off");
     exit(signum);
 }
 
 void monitorDeviceStatus() {
-    //while (true) {
+    while (true) {
         std::string status = getDeviceField("status");
-        std::cout << "🔍 Current Status: " << status << std::endl;
+        std::cout << "Current Status: " << status << std::endl;
         
         if (status == "scanning" && !scanningActive.load()) {
             scanningActive.store(true);
             stopScanning.store(false);
-            std::cout << "🚀 Status changed to SCANNING. Starting scan process..." << std::endl;
+            std::cout << "Status changed to SCANNING. Starting scan process..." << std::endl;
         } else if (status == "idle" && scanningActive.load()) {
             stopScanning.store(true);
-            std::cout << "🛑 Status changed to IDLE. Stopping scan process..." << std::endl;
+            std::cout << "Status changed to IDLE. Stopping scan process..." << std::endl;
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
-   // }
+    }
 }
 
-int SymptomDetection(std::promise<std::string> prom){  
-    record(); 
-    std::vector<float> mfcc = extract_mfcc(ADP_FILENAME);
-    std::cout << "MFCC Features extracted\n";
-    export_mfccFile(mfcc, MFCC_FILE);
-    
-    std::string sound_symptom = readPredication(INPUT_FILE); // get the emotion from the text file created by Python Component
-    
-    prom.set_value(sound_symptom);
-    return 0; 
-}
-
-int EmotionDetection(std::promise<std::string> prom){
-    std::cerr << "Baby Emotion Recognition Software Enabled" << std::endl;
-    FaceDetection FaceDetection(CASCADE_PATH);
-    EmotionRecognizer EmotionRecognizer(MODEL_PATH);
-    
-    // initialize the video frame
-    cv::Mat frame;
-
-    // initialize the video capture object
-    cv::VideoCapture cap(0, cv::CAP_V4L2);
-    if(!cap.isOpened()) {
-        std::cerr << "Error: Unable to open web camera" << std::endl;
-        return -1;
-    }
-
-    // create the window
-    cv::namedWindow(APP);
-
-    //adjust frame due to slow VM processing time
-    cap.set(cv::CAP_PROP_FRAME_WIDTH, 1280);  // Try 1280x720
-    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
-    cap.set(cv::CAP_PROP_FPS, 5);  // Set FPS to 30 for smoother video
-    // Use MJPEG codec for a better opencv backend
-    cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G')); 
-        
-    //read a new frame
-    cap >> frame;
-    if(frame.empty()){
-        std::cerr << "Error: Empty frame received" << std::endl;
-        exit(1);
-    }
-    
-    //detect faces
-    auto faces = FaceDetection.detectFaces(frame);
-    for(const auto& face : faces) {
-        cv::Mat faceROI = frame(face);
-        std::vector<std::string> emotions = EmotionRecognizer.predict(faceROI);
-        FaceDetection.drawFace(frame, face, emotions[0]);
-        prom.set_value(emotions[0]);
-        break;
-    }
-    cap.release();
-    
-    return 0;
-}
 
 std::vector<std::string> split_string(std::string input){  
     size_t pos = input.find(":");
@@ -552,67 +506,128 @@ std::vector<std::string> split_string(std::string input){
     }
 }
 
+void SymptomDetection(){  
+    
+    while(true){
+        record(); 
+        std::vector<float> mfcc = extract_mfcc(ADP_FILENAME);
+        std::cout << "MFCC Features extracted\n";
+        export_mfccFile(mfcc, MFCC_FILE);
+    
+    
+        // 2 second delay
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+
+        sound_symptom = readPredication(INPUT_FILE); // get the emotion from the text file created by Python Component
+    
+    
+        std::cout << "------------------------------------------------------------\n";
+        std::cout << "Symptom = " << previous_sympton << std::endl; 
+        std::cout << "------------------------------------------------------------\n";
+
+    
+        if(sound_symptom != previous_sympton){
+            symptom_flag = __cpp_lib_allocator_traits_is_always_equal; 
+            previous_sympton = sound_symptom;
+
+        }else{
+            symptom_flag = false; 
+        }
+    }
+
+}
+
+void EmotionDetection(){
+    
+    while(true){
+        
+        std::cerr << "Baby Emotion Recognition Software Enabled" << std::endl;
+        FaceDetection FaceDetection(CASCADE_PATH);
+        EmotionRecognizer EmotionRecognizer(MODEL_PATH);
+        
+        // initialize the video frame
+        cv::Mat frame;
+
+        // initialize the video capture object
+        cv::VideoCapture cap(0, cv::CAP_V4L2);
+        if(!cap.isOpened()) {
+            std::cerr << "Error: Unable to open web camera" << std::endl;
+        }
+
+        // create the window
+        cv::namedWindow(APP);
+
+        //adjust frame due to slow VM processing time
+        cap.set(cv::CAP_PROP_FRAME_WIDTH, 1280);  // Try 1280x720
+        cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
+        cap.set(cv::CAP_PROP_FPS, 5);  // Set FPS to 30 for smoother video
+        // Use MJPEG codec for a better opencv backend
+        cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G')); 
+            
+        //read a new frame
+        cap >> frame;
+        if(frame.empty()){
+            std::cerr << "Error: Empty frame received" << std::endl;
+            exit(1);
+        }
+        
+        //detect faces
+        auto faces = FaceDetection.detectFaces(frame);
+        for(const auto& face : faces) {
+            cv::Mat faceROI = frame(face);
+            std::vector<std::string> emotions = EmotionRecognizer.predict(faceROI);
+            FaceDetection.drawFace(frame, face, emotions[0]);
+            emotion_detected = emotions[0];
+            break;
+        }
+        cap.release();  
+        
+        // process emotion and parse 
+        
+        std::vector<std::string> emotion_parsed = split_string(emotion_detected);
+        
+       
+        std::cout << "------------------------------------------------------------\n";
+        std::cout << "Emotion = " << previous_emotion<< std::endl;
+        std::cout << "Emotion Accuracy = " << previous_acc << std::endl; 
+        std::cout << "------------------------------------------------------------\n";
+
+        
+        if(emotion_parsed[0] != previous_emotion){
+            flag = __cpp_lib_allocator_traits_is_always_equal;
+            previous_emotion = emotion_parsed[0];
+            previous_acc = std::stoi(emotion_parsed[1]);
+        }else{
+            flag = false; 
+        }
+        
+    }
+    
+}
+
 int main(){
     srand(static_cast<unsigned>(time(nullptr)));
-    while(true){
-        srand(static_cast<unsigned>(time(nullptr)));
+    srand(static_cast<unsigned>(time(nullptr)));
 
-        std::promise<std::string> symptom;
-        std::future<std::string> fut_sym = symptom.get_future();
+    std::cout << "Symptom Detect Thread Start ....\n";
+    std::thread symptomDetect(SymptomDetection);
+    std::cout << "Emotion Detect Thread Start ....\n";
+    std::thread emotionDetect(EmotionDetection);
 
-        std::promise<std::string> emotion;
-        std::future<std::string> fut_emo = emotion.get_future();
-
-        std::thread symptomDetect(SymptomDetection, std::move(symptom));
-        std::thread emotionDetect(EmotionDetection, std::move(emotion));
-
-        std::signal(SIGINT, signalHandler);
-        std::signal(SIGTERM, signalHandler);
-        setDeviceStatus("idle");
-        std::thread monitorThread(monitorDeviceStatus);
-        std::thread scanThread(scanningWorkflow);
+    std::signal(SIGINT, signalHandler);
+    std::signal(SIGTERM, signalHandler);
+    setDeviceStatus("idle");
+    
+    std::cout << "Monitor Thread Start ....\n";
+    std::thread monitorThread(monitorDeviceStatus);
+    std::cout << "Scan Thread Start ....\n";
+    std::thread scanThread(scanningWorkflow);
 
 
-        std::cout << "Monitor Thread Start ....\n";
-        monitorThread.join();
-        std::cout << "Scan Thread Start ....\n";
-        scanThread.join();
-        std::cout << "Symptom Detect Thread Start ....\n";
-        symptomDetect.join();
-        std::cout << "Emotion Detect Thread Start ....\n";
-        emotionDetect.join();
-
-        std::cout << "------------------------------------------------------------\n";
-        std::string predicted_symptom; 
-        try{
-            predicted_symptom = fut_sym.get();
-        }catch (const std::exception& e){
-            std::cout << "Symptom Empty\n";
-        }
-        try{
-            std::string detected_emotion = fut_emo.get();
-            std::vector<std::string> emotion_parsed = split_string(detected_emotion);
-  
-            if ( (emotion_parsed[0] != previous_emotion) || (predicted_symptom != previous_sympton)){
-                flag = __cpp_lib_allocator_traits_is_always_equal; 
-                previous_emotion = emotion_parsed[0];
-                previous_sympton = predicted_symptom;
-                previous_acc = std::stoi(emotion_parsed[1]);
-                std::cout << "Emotion = " << previous_emotion<< std::endl;
-                std::cout << "Symptom = " << previous_sympton << std::endl; 
-                std::cout << "Emotion Accuracy = " << previous_acc << std::endl; 
-                flag = true;  
-            } else{
-                flag = false;
-            }
-        }catch (const std::exception& e){
-            std::cout << "Emotion Empty Frame\n" ;
-            flag = false;
-        }
-
-        std::cout << "------------------------------------------------------------\n";
-
-    }
+    monitorThread.join();
+    scanThread.join();
+    symptomDetect.join();
+    emotionDetect.join();
     
     return 0; 
 }
