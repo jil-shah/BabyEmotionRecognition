@@ -17,7 +17,7 @@ SRC_FILES = $(SRC_DIR)/main.cpp $(SRC_DIR)/Record_BabySounds.cpp $(SRC_DIR)/ADPr
 OBJ_FILES = $(BUILD_DIR)/main.o $(BUILD_DIR)/Record_BabySounds.o $(BUILD_DIR)/ADProcess_BabySounds.o $(BUILD_DIR)/EmotionRecognizer.o $(BUILD_DIR)/FaceDetection.o
 
 # OUTPUT exe
-OUTPUT = BabySounds
+OUTPUT = BabyBeacon
 
 # Default Target
 all: $(OUTPUT)
