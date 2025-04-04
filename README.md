@@ -160,5 +160,6 @@ $ ./install_libs.sh
 To run the C++ project, run the Makefile
 ```sh
 $ make
+$ chmod +x BabyBeacon.sh
+$ ./BabyBeacon.sh
 ```
-
