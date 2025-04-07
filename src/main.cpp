@@ -42,18 +42,23 @@ int previous_acc = 0;
 
 std::mutex mtx; 
 std::condition_variable cv_sound_emotion; 
+
+std::mutex mtx_api; 
+std::condition_variable cv_api; 
+bool data_ready = false; 
+
 // Symptom Detection Thread Global Variables
 std::string sound_symptom = ""; 
 bool sound_ready = false; 
-bool symptom_flag = false; 
+bool symptom_flag = true; 
 
 // Emotion Detection Thread Global Variables
-std::string emotion_detected = "Neutral";
-std::string emotion_accuracy = "0"; 
-bool emotion_flag = false; 
+std::string emotion_detected = "";
+int emotion_accuracy = 0; 
+bool emotion_flag = true; 
 
 
-bool flag = false;
+bool flag = true;
 
 std::string getCurrentTimestamp() {
     std::time_t now = std::time(nullptr);
@@ -177,11 +182,13 @@ void uploadScanToRide(int rideId, int scanCount) {
         cpr::Body{updatedRideData.dump()}
     );
 
-    /*if (patchResponse.status_code == 200) {
-        std::cout << "📡 Scan " << scanCount << " added: " << selectedEmotion << " + " << selectedSound << " Accuracy: " << accuracy << "%\n";
+    if (patchResponse.status_code == 200) {
+        std::cout << "Scan " << scanCount << " added: " 
+                  << emotion_detected << " + " << sound_symptom 
+                  << " Accuracy: " << emotion_accuracy << "%\n";
     } else {
-        std::cerr << "❌ Failed to upload scan " << scanCount << "! Response: " << patchResponse.text << std::endl;
-    }*/
+        std::cerr << "!!! Failed to upload scan " << scanCount << "! Response: " << patchResponse.text << std::endl;
+    }
 }
 
 void uploadScanToRide_Old(int rideId, int scanCount) {
@@ -432,17 +439,19 @@ void endRide(int rideId) {
 
 void scanningWorkflow() {
     while (true) {
+
         if (scanningActive.load()) {
             std::cout << "Scanning started..." << std::endl;
-
+            
+            
             username = getDeviceField("username");
-            std::cout << "Username: " << username << std::endl;
+            //std::cout << "Username: " << username << std::endl;
 
             lastRideId = fetchLastRideId() + 1;
-            std::cout << "New Ride ID: " << lastRideId << " (int)" << std::endl;
+            //std::cout << "New Ride ID: " << lastRideId << " (int)" << std::endl;
 
             scanningBaby = getUserField("scanning_baby");
-            std::cout << "Scanning Baby: " << scanningBaby << std::endl;
+            //std::cout << "Scanning Baby: " << scanningBaby << std::endl;
 
             // Create a new ride in the device's rides subcollection
             createNewRide(lastRideId);
@@ -453,12 +462,17 @@ void scanningWorkflow() {
             std::cout << "Ride " << lastRideId << " started.\n";
 
             for (int scanCount = 1; !stopScanning.load(); ++scanCount) {
-                std::cout << "Uploading scan " << scanCount << "...\n";
                 // Ensure scans are uploaded under the ride in the `rides` subcollection of the device
-                if (symptom_flag == true && emotion_flag == true){
-                    uploadScanToRide(lastRideId, scanCount);
-                    
-                }
+                //if (symptom_flag == true && emotion_flag == true){
+                std::cout << "Wait For Data for Scan #" <<scanCount << std::endl;
+                
+                std::unique_lock<std::mutex> lock_api(mtx_api);
+                cv_api.wait(lock_api,[] {return data_ready;});
+                
+                std::cout << "Uploading scan " << scanCount << "...\n";
+                uploadScanToRide(lastRideId, scanCount);
+                data_ready = false;
+                //}
 
                 std::this_thread::sleep_for(std::chrono::seconds(5));
             }
@@ -466,11 +480,11 @@ void scanningWorkflow() {
             endRide(lastRideId);
             scanningActive.store(false);
             stopScanning.store(false);
-            std::cout << "Ride " << lastRideId << " ended.\n";
+            //std::cout << "Ride " << lastRideId << " ended.\n";
         }
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
-        std::cout << "Status: " << scanningActive.load() << " *\n";
+        //std::cout << "Status: " << scanningActive.load() << " *\n";
     }
 }
 
@@ -500,6 +514,10 @@ void monitorDeviceStatus() {
 
 std::vector<std::string> split_string(std::string input){  
     size_t pos = input.find(":");
+    
+    std::cout << "Split String Input: " << input << "\n";
+
+    
     if(pos != std::string::npos){
     
         std::string emotion = input.substr(0,pos);
@@ -538,13 +556,13 @@ void SymptomDetection(){
         sound_ready = true;
         cv_sound_emotion.notify_one(); 
 
-        if(sound_symptom != previous_sympton){
+        /*if(sound_symptom != previous_sympton){
             symptom_flag = true; 
             previous_sympton = sound_symptom;
             
         }else{
             symptom_flag = false; 
-        }
+        }*/
     }
 
 }
@@ -578,8 +596,6 @@ void EmotionDetection(){
         cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G')); 
         
         
-     
-        
         //read a new frame
         cap >> frame;
         int x = 0; 
@@ -588,7 +604,7 @@ void EmotionDetection(){
             //exit(1);
             
             emotion_detected = "Neutral";
-            emotion_accuracy = "0";
+            emotion_accuracy = 0;
             x = 1;
         }
         
@@ -606,11 +622,11 @@ void EmotionDetection(){
             
             std::vector<std::string> emotion_parsed = split_string(emotion_detected);
             emotion_detected = emotion_parsed[0]; 
-            emotion_accuracy = emotion_parsed[1]; 
+            emotion_accuracy = std::stoi(emotion_parsed[1]); 
 
         }
         
-        //cv::imshow(APP,frame);
+        cv::imshow(APP,frame);
         cap.release();  
         
         // process emotion and parse 
@@ -626,13 +642,19 @@ void EmotionDetection(){
         
         sound_ready = false; 
 
-        if(emotion_detected!= previous_emotion){
+        // by this point, all three values are ready 
+        std::unique_lock<std::mutex> lock_api(mtx_api);
+        data_ready = true;
+        cv_api.notify_one(); 
+        
+        
+        /*if(emotion_detected!= previous_emotion){
             emotion_flag = true;
             previous_emotion = emotion_detected;
             previous_acc = std::stoi(emotion_accuracy);
         }else{
             flag = false; 
-        }
+        }*/
         
     }
     
